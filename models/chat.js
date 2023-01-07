@@ -7,8 +7,23 @@ const chatSchema = new mongoose.Schema({
     type: boolean,
     required: true,
   },
-  admins: [{ _id }],
+  admins: {
+    type: String,
+    required: true,
+  },
   latestMessage: {
     type: String,
+    default: "",
+  },
+  members: {
+    type: Array,
+    required: true,
+  },
+  messages: {
+    type: Array,
+    default: [],
   },
 });
+
+const Chat = mongoose.model("Chat", chatSchema);
+module.exports = Chat;
