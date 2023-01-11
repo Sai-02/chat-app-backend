@@ -41,7 +41,13 @@ const updateChatListOfMembers = async (members, id) => {
     }
   });
 };
+
+const deleteChat = async (req, res, next) => {
+  return res.status(200).json({ msg: "We will work on it.." });
+};
+
 module.exports = {
   validateCreateChatData,
   createChat,
+  deleteChat,
 };
