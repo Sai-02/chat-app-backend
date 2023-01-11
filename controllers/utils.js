@@ -9,12 +9,11 @@ const authenticateUser = async (req, res, next) => {
       const user = await jwtDecode(token);
       req.body.userID = user._id;
       next();
-    }
+    } else return res.status(401).json({ msg: "Unauthorized" });
   } catch (e) {
     console.log(e);
     return res.status(401).json({ msg: "Unauthorized" });
   }
-  return res.status(401).json({ msg: "Unauthorized" });
 };
 
 module.exports = {

@@ -46,8 +46,34 @@ const deleteChat = async (req, res, next) => {
   return res.status(200).json({ msg: "We will work on it.." });
 };
 
+const getChatList = async (req, res, next) => {
+  const userID = req.body.userID;
+  try {
+    const user = await User.findOne({ _id: userID });
+    const response = {
+      size: 0,
+      chats: [],
+    };
+    const chatList = user.chatList;
+    for (let i = 0; i < chatList.length; i++) {
+      try {
+        const chat = await Chat.findOne({ _id: chatList[i] });
+        response.chats.push(chat);
+        response.size++;
+      } catch (e) {
+        console.log(e);
+      }
+    }
+    return res.status(200).json({ ...response });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ msg: "Something went wrong" });
+  }
+};
+
 module.exports = {
   validateCreateChatData,
   createChat,
   deleteChat,
+  getChatList,
 };

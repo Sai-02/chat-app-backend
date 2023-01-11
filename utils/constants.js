@@ -5,6 +5,8 @@ const ROUTE_PATHS = {
   CHAT: "/chat",
   CREATE: "/create",
   DELETE: "/delete",
+  LIST: "/list",
+  ALL: "/all",
 };
 
 module.exports = {
