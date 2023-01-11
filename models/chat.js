@@ -4,11 +4,15 @@ const mongoose = require("mongoose");
 
 const chatSchema = new mongoose.Schema({
   isGroup: {
-    type: boolean,
+    type: Boolean,
+    required: true,
+  },
+  name: {
+    type: String,
     required: true,
   },
   admins: {
-    type: String,
+    type: Array,
     required: true,
   },
   latestMessage: {

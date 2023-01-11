@@ -3,6 +3,7 @@ const ROUTE_PATHS = {
   LOGIN: "/login",
   SIGNUP: "/signup",
   CHAT: "/chat",
+  CREATE:"/create"
 };
 
 module.exports = {
