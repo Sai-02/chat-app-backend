@@ -1,4 +1,5 @@
 const Chat = require("../models/chat");
+const MessageStore = require("../models/messageStore");
 const User = require("../models/user");
 
 const validateCreateChatData = async (req, res, next) => {
@@ -19,7 +20,15 @@ const validateCreateChatData = async (req, res, next) => {
 const createChat = async (req, res, next) => {
   const { isGroup, name, admins, members } = req.body;
   try {
-    const chat = new Chat({ isGroup, name, admins, members });
+    const messageStore = new MessageStore();
+    await messageStore.save();
+    const chat = new Chat({
+      isGroup,
+      name,
+      admins,
+      members,
+      messageStoreID: messageStore._id,
+    });
     await chat.save();
     console.log(chat);
     await updateChatListOfMembers(members, chat._id);

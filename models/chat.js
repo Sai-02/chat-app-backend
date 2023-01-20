@@ -23,9 +23,9 @@ const chatSchema = new mongoose.Schema({
     type: Array,
     required: true,
   },
-  messages: {
-    type: Array,
-    default: [],
+  messageStoreID: {
+    type: String,
+    required: true,
   },
 });
 
