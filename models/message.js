@@ -11,6 +11,10 @@ const messageSchema = new mongoose.Schema({
     type: Array,
     required: true,
   },
+  chatID: {
+    type: String,
+    required: true,
+  },
   text: {
     type: String,
     required: true,
