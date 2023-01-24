@@ -7,6 +7,7 @@ const ROUTE_PATHS = {
   DELETE: "/delete",
   LIST: "/list",
   ALL: "/all",
+  MESSAGE:"/message"
 };
 
 module.exports = {

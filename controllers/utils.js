@@ -8,6 +8,7 @@ const authenticateUser = async (req, res, next) => {
     if (token) {
       const user = await jwtDecode(token);
       req.body.userID = user._id;
+      req.body.user = user;
       next();
     } else return res.status(401).json({ msg: "Unauthorized" });
   } catch (e) {
