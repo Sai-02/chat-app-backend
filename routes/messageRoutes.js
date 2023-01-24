@@ -1,7 +1,10 @@
 const {
   getMessageList,
   validateGetMessageListData,
-  checkUserExistsInChat,
+  checkUserExistsInChatGET,
+  checkUserExistsInChatPOST,
+  validateSendMessageData,
+  sendMessage,
 } = require("../controllers/message");
 const { ROUTE_PATHS } = require("../utils/constants");
 const router = require("express").Router();
@@ -9,8 +12,15 @@ const router = require("express").Router();
 router.get(
   ROUTE_PATHS.LIST,
   validateGetMessageListData,
-  checkUserExistsInChat,
+  checkUserExistsInChatGET,
   getMessageList
+);
+
+router.post(
+  ROUTE_PATHS.SEND,
+  validateSendMessageData,
+  checkUserExistsInChatPOST,
+  sendMessage
 );
 
 module.exports = router;
