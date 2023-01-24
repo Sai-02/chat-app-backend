@@ -1,6 +1,7 @@
 const Chat = require("../models/chat");
 const Message = require("../models/message");
 const MessageStore = require("../models/messageStore");
+const User = require("../models/user");
 
 //  Controller for getting message list
 const getMessageList = async (req, res) => {
@@ -13,10 +14,30 @@ const getMessageList = async (req, res) => {
     const messageStore = await MessageStore.findOne({
       _id: messageStoreID,
     });
+    const messages = [];
+    for (let i = 0; i < messageStore.messages.length; i++) {
+      try {
+        const message = await Message.findOne({
+          _id: messageStore.messages[i],
+        });
+        const user = await User.findOne({
+          _id: message.senderID,
+        });
+        messages.push({
+          message,
+          sender: {
+            name: user?.name,
+            username: user?.username,
+          },
+        });
+      } catch (e) {
+        console.log(e);
+      }
+    }
 
     return res.status(200).json({
-      msg: "pahuch rha h",
-      chat,
+      messages,
+      size: messages.length,
     });
   } catch (e) {
     console.log(e);
