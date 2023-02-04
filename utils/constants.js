@@ -11,6 +11,11 @@ const ROUTE_PATHS = {
   SEND: "/send",
 };
 
+const SOCKET_EVENTS = {
+  CONNECTION: "connection",
+};
+
 module.exports = {
   ROUTE_PATHS,
+  SOCKET_EVENTS,
 };
