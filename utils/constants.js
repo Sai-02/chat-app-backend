@@ -13,6 +13,8 @@ const ROUTE_PATHS = {
 
 const SOCKET_EVENTS = {
   CONNECTION: "connection",
+  SEND_MESSAGE: "send_message",
+  RECIEVE_MESSAGE: "recieve_message",
 };
 
 module.exports = {
