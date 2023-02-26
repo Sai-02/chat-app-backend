@@ -73,6 +73,9 @@ const getChatList = async (req, res, next) => {
         console.log(e);
       }
     }
+    response.chats.sort(
+      (a, b) => new Date(b.lastUpdatedTime) - new Date(a.lastUpdatedTime)
+    );
     return res.status(200).json({ ...response });
   } catch (e) {
     console.log(e);
