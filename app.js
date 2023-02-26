@@ -18,7 +18,7 @@ app.use(cors());
 app.use(bodyparser.urlencoded({ extended: false }));
 app.use(express.json());
 
-// routes 
+// routes
 app.use(ROUTE_PATHS.AUTH, authRoutes);
 app.use(ROUTE_PATHS.CHAT, authenticateUser, chatRoutes);
 app.use(ROUTE_PATHS.MESSAGE, authenticateUser, messageRoutes);
@@ -61,6 +61,7 @@ const start = async () => {
           messageStore?.messages.push(message?._id);
           await messageStore.save();
           chat.latestMessage = message.text;
+          chat.lastUpdatedTime = Date.now();
           await chat.save();
           // for reciever
           socket.broadcast.emit(SOCKET_EVENTS.RECIEVE_MESSAGE, {

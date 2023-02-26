@@ -117,6 +117,7 @@ const sendMessage = async (req, res, next) => {
     messageStore?.messages.push(message?._id);
     await messageStore.save();
     chat.latestMessage = message.text;
+    chat.lastUpdatedTime = Date.now();
     await chat.save();
     return res.status(200).json({
       msg: "Message Sent !!",
