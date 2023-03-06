@@ -43,7 +43,7 @@ const updateChatListOfMembers = async (members, id) => {
   await members.map(async (member) => {
     try {
       let user = await User.findOne({ username: member });
-      user?.chatList?.push(id);
+      user?.chatList?.push({ id, unreadMessageCount: 0 });
       await user.save();
     } catch (e) {
       console.log(e);
@@ -66,8 +66,11 @@ const getChatList = async (req, res, next) => {
     const chatList = user.chatList;
     for (let i = 0; i < chatList.length; i++) {
       try {
-        const chat = await Chat.findOne({ _id: chatList[i] });
-        response.chats.push(chat);
+        const chat = await Chat.findOne({ _id: chatList[i].id });
+        response.chats.push({
+          ...chat.toObject(),
+          unreadMessageCount: chatList[i].unreadMessageCount,
+        });
         response.size++;
       } catch (e) {
         console.log(e);
@@ -83,9 +86,39 @@ const getChatList = async (req, res, next) => {
   }
 };
 
+const validateMarkAllMessageRead = async (req, res, next) => {
+  const { chatID } = req.body;
+  if (!chatID)
+    return res.status(400).json({ msg: "chatID is missing in request" });
+  next();
+};
+
+const markAllMessageRead = async (req, res, next) => {
+  const userID = req.body.userID;
+  const chatID = req.body.chatID;
+
+  try {
+    const user = await User.findOne({ _id: userID });
+    const chatList = user.chatList;
+    for (let i = 0; i < chatList.length; i++) {
+      if (chatList[i].id.toString() === chatID) {
+        chatList[i] = { ...chatList[i], unreadMessageCount: 0 };
+        await user.save();
+        return res.status(200).json({ msg: "Success" });
+      }
+    }
+    return res.status(400).json({ msg: "No Chat present with this id" });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ msg: "Something went wrong" });
+  }
+};
+
 module.exports = {
   validateCreateChatData,
   createChat,
   deleteChat,
   getChatList,
+  markAllMessageRead,
+  validateMarkAllMessageRead,
 };

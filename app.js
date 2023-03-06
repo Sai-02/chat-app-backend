@@ -13,6 +13,7 @@ const jwtDecode = require("jwt-decode");
 const MessageStore = require("./models/messageStore");
 const Chat = require("./models/chat");
 const Message = require("./models/message");
+const User = require("./models/user");
 const app = express();
 app.use(cors());
 app.use(bodyparser.urlencoded({ extended: false }));
@@ -63,6 +64,29 @@ const start = async () => {
           chat.latestMessage = message.text;
           chat.lastUpdatedTime = Date.now();
           await chat.save();
+          // Marking this message as unread for members of group
+          await (async () => {
+            console.log(chat.members);
+            for (let i = 0; i < chat.members.length; i++) {
+              const reciever = await User.findOne({
+                username: chat.members[i],
+              });
+              if (reciever._id.toString() !== user._id) {
+                console.log(reciever);
+                const chatListOfReciever = reciever.chatList;
+                for (let j = 0; j < chatListOfReciever.length; j++) {
+                  if (chatListOfReciever[j].id.toString() === chatID) {
+                    chatListOfReciever[j] = {
+                      ...chatListOfReciever[j],
+                      unreadMessageCount:
+                        chatListOfReciever[j].unreadMessageCount + 1,
+                    };
+                  }
+                  await reciever.save();
+                }
+              }
+            }
+          })();
           // for reciever
           socket.broadcast.emit(SOCKET_EVENTS.RECIEVE_MESSAGE, {
             message,
@@ -81,6 +105,50 @@ const start = async () => {
           });
         } catch (e) {
           console.log("Something went wrong", e);
+        }
+      });
+
+      socket.on(SOCKET_EVENTS.MARK_AS_READ, async (arg) => {
+        const { chatID, authToken } = arg;
+        if (!chatID || !authToken) return;
+        try {
+          const userDecoded = await jwtDecode(authToken);
+          console.log(userDecoded);
+          const user = await User.findOne({
+            username: userDecoded.username,
+          });
+          const chatList = user.chatList;
+          for (let i = 0; i < chatList.length; i++) {
+            if (chatList[i].id.toString() === chatID) {
+              chatList[i] = { ...chatList[i], unreadMessageCount: 0 };
+              await user.save();
+            }
+          }
+          const response = {
+            size: 0,
+            chats: [],
+          };
+          for (let i = 0; i < chatList.length; i++) {
+            try {
+              const chat = await Chat.findOne({ _id: chatList[i].id });
+              response.chats.push({
+                ...chat.toObject(),
+                unreadMessageCount: chatList[i].unreadMessageCount,
+              });
+              response.size++;
+            } catch (e) {
+              console.log(e);
+            }
+          }
+          response.chats.sort(
+            (a, b) => new Date(b.lastUpdatedTime) - new Date(a.lastUpdatedTime)
+          );
+
+          socket.emit(SOCKET_EVENTS.GET_CHAT_LIST, {
+            ...response,
+          });
+        } catch (e) {
+          console.log(e);
         }
       });
     });
