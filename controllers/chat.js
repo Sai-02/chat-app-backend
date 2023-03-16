@@ -73,6 +73,7 @@ const getChatList = async (req, res, next) => {
         ...response.chats[i].toObject(),
         unreadMessageCount,
       };
+      response.size++;
     }
     response.chats.sort(
       (a, b) => new Date(b.lastUpdatedTime) - new Date(a.lastUpdatedTime)

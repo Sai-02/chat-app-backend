@@ -138,6 +138,7 @@ const start = async () => {
               ...response.chats[i].toObject(),
               unreadMessageCount,
             };
+            response.size++;
           }
           response.chats.sort(
             (a, b) => new Date(b.lastUpdatedTime) - new Date(a.lastUpdatedTime)
