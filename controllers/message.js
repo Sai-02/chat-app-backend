@@ -14,27 +14,24 @@ const getMessageList = async (req, res) => {
     const messageStore = await MessageStore.findOne({
       _id: messageStoreID,
     });
-    const messages = [];
-    for (let i = 0; i < messageStore.messages.length; i++) {
-      try {
-        const message = await Message.findOne({
-          _id: messageStore.messages[i],
+    const messages = await Message.find({
+      _id: { $in: [...messageStore.messages] },
+    });
+    const usersMap = [];
+    for (let i = 0; i < messages.length; i++) {
+      if (!usersMap[messages[i].senderID]) {
+        usersMap[messages[i].senderID] = await User.findOne({
+          _id: messages[i].senderID,
         });
-        const user = await User.findOne({
-          _id: message.senderID,
-        });
-        messages.push({
-          message,
-          sender: {
-            name: user?.name,
-            username: user?.username,
-          },
-        });
-      } catch (e) {
-        console.log(e);
       }
+      messages[i] = {
+        message: messages[i].toObject(),
+        sender: {
+          name: usersMap[messages[i].senderID]?.name,
+          username: usersMap[messages[i].senderID].username,
+        },
+      };
     }
-
     return res.status(200).json({
       messages,
       size: messages.length,
