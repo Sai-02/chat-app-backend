@@ -63,18 +63,16 @@ const getChatList = async (req, res, next) => {
       size: 0,
       chats: [],
     };
-    const chatList = user.chatList;
-    for (let i = 0; i < chatList.length; i++) {
-      try {
-        const chat = await Chat.findOne({ _id: chatList[i].id });
-        response.chats.push({
-          ...chat.toObject(),
-          unreadMessageCount: chatList[i].unreadMessageCount,
-        });
-        response.size++;
-      } catch (e) {
-        console.log(e);
-      }
+    const chatListIDs = user.chatList.map((chat) => chat.id.toString());
+    response.chats = await Chat.find({ _id: { $in: [...chatListIDs] } });
+    for (let i = 0; i < response.chats.length; i++) {
+      const { unreadMessageCount } = user.chatList.find(
+        (val) => val.id.toString() === response.chats[i]._id.toString()
+      );
+      response.chats[i] = {
+        ...response.chats[i].toObject(),
+        unreadMessageCount,
+      };
     }
     response.chats.sort(
       (a, b) => new Date(b.lastUpdatedTime) - new Date(a.lastUpdatedTime)
