@@ -10,6 +10,8 @@ const ROUTE_PATHS = {
   MESSAGE: "/message",
   SEND: "/send",
   MARK_AS_READ: "/mark_as_read",
+  USER: "/user",
+  SEARCH: "/search",
 };
 
 const SOCKET_EVENTS = {

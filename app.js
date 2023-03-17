@@ -6,6 +6,7 @@ const connectDB = require("./db/connect");
 const authRoutes = require("./routes/authRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const messageRoutes = require("./routes/messageRoutes");
+const userRoutes = require("./routes/userRoutes");
 const { ROUTE_PATHS, SOCKET_EVENTS } = require("./utils/constants");
 const { authenticateUser } = require("./controllers/utils");
 const socketIO = require("socket.io");
@@ -23,6 +24,7 @@ app.use(express.json());
 app.use(ROUTE_PATHS.AUTH, authRoutes);
 app.use(ROUTE_PATHS.CHAT, authenticateUser, chatRoutes);
 app.use(ROUTE_PATHS.MESSAGE, authenticateUser, messageRoutes);
+app.use(ROUTE_PATHS.USER, authenticateUser, userRoutes);
 const port = process.env.PORT || 5000;
 let server;
 const start = async () => {
