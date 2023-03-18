@@ -40,7 +40,8 @@ const createChat = async (req, res, next) => {
 };
 
 const updateChatListOfMembers = async (members, id) => {
-  await members.map(async (member) => {
+  for (let i = 0; i < members.length; i++) {
+    const member = members[i];
     try {
       let user = await User.findOne({ username: member });
       user?.chatList?.push({ id, unreadMessageCount: 0 });
@@ -48,7 +49,7 @@ const updateChatListOfMembers = async (members, id) => {
     } catch (e) {
       console.log(e);
     }
-  });
+  }
 };
 
 const deleteChat = async (req, res, next) => {
