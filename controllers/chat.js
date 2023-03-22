@@ -7,7 +7,7 @@ const validateCreateChatData = async (req, res, next) => {
   if (!headers.authorization)
     return res.status(401).json({ msg: "Unauthorized" });
   const { isGroup, name, admins, members } = req.body;
-  if (!isGroup)
+  if (isGroup === undefined)
     return res.status(400).json({ msg: `Missing parameter isGroup` });
   if (!name) return res.status(400).json({ msg: `Missing parameter name` });
   if (!admins) return res.status(400).json({ msg: "Missing parameter admins" });
@@ -30,12 +30,39 @@ const createChat = async (req, res, next) => {
       messageStoreID: messageStore._id,
     });
     await chat.save();
-    console.log(chat);
     await updateChatListOfMembers(members, chat._id);
+    if (!isGroup) {
+      await updatePersonalChatMap(members, chat._id.toString());
+    }
     return res.status(200).json({ chat });
   } catch (e) {
     console.log(e);
     res.status(500).json({ msg: "Something went wrong!!" });
+  }
+};
+
+const updatePersonalChatMap = async (members, chatID) => {
+  try {
+    const member1 = members[0];
+    const member2 = members[1];
+    const user1 = await User.findOne({
+      username: member1,
+    });
+    const user2 = await User.findOne({
+      username: member2,
+    });
+    user1.personalChatMap.push({
+      username: member2,
+      chatID,
+    });
+    user2.personalChatMap.push({
+      username: member1,
+      chatID,
+    });
+    await user1.save();
+    await user2.save();
+  } catch (e) {
+    console.log(e);
   }
 };
 
@@ -61,24 +88,24 @@ const getChatList = async (req, res, next) => {
   try {
     const user = await User.findOne({ _id: userID });
     const response = {
-      size: 0,
-      chats: [],
+      personalChatMap: [],
+      chatList: [],
     };
     const chatListIDs = user.chatList.map((chat) => chat.id.toString());
-    response.chats = await Chat.find({ _id: { $in: [...chatListIDs] } });
-    for (let i = 0; i < response.chats.length; i++) {
+    response.chatList = await Chat.find({ _id: { $in: [...chatListIDs] } });
+    for (let i = 0; i < response.chatList.length; i++) {
       const { unreadMessageCount } = user.chatList.find(
-        (val) => val.id.toString() === response.chats[i]._id.toString()
+        (val) => val.id.toString() === response.chatList[i]._id.toString()
       );
-      response.chats[i] = {
-        ...response.chats[i].toObject(),
+      response.chatList[i] = {
+        ...response.chatList[i].toObject(),
         unreadMessageCount,
       };
-      response.size++;
     }
-    response.chats.sort(
+    response.chatList.sort(
       (a, b) => new Date(b.lastUpdatedTime) - new Date(a.lastUpdatedTime)
     );
+    response.personalChatMap = [...user.personalChatMap];
     return res.status(200).json({ ...response });
   } catch (e) {
     console.log(e);

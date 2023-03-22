@@ -31,6 +31,10 @@ const userSchema = new mongoose.Schema({
     type: Array,
     default: [],
   },
+  personalChatMap: {
+    type: Array,
+    default: [],
+  },
 });
 
 const User = mongoose.model("User", userSchema);
