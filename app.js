@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const bodyparser = require("body-parser");
+const formidable = require("express-formidable");
 require("dotenv").config();
 const connectDB = require("./db/connect");
 const authRoutes = require("./routes/authRoutes");
@@ -18,6 +19,7 @@ const User = require("./models/user");
 const app = express();
 app.use(cors());
 app.use(bodyparser.urlencoded({ extended: false }));
+app.use(formidable());
 app.use(express.json());
 
 // routes

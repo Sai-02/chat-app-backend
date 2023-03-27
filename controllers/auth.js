@@ -1,7 +1,53 @@
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const {
+  BlobServiceClient,
+  StorageSharedKeyCredential,
+  newPipeline,
+} = require("@azure/storage-blob");
 require("dotenv").config();
+
+const sharedKeyCredential = new StorageSharedKeyCredential(
+  process.env.AZURE_STORAGE_ACCOUNT_NAME,
+  process.env.AZURE_STORAGE_ACCOUNT_ACCESS_KEY
+);
+const pipeline = newPipeline(sharedKeyCredential);
+const getBlobName = (originalName) => {
+  const identifier = Math.random().toString().replace(/0\./, "");
+  return `${identifier}-${originalName}`;
+};
+const blobServiceClient = new BlobServiceClient(
+  `https://${process.env.AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net`,
+  pipeline
+);
+const createUser = async (req, res, next) => {
+  const { name, password, phone_no, email, username } = req.fields;
+  const { image } = req.files;
+  try {
+    const blobName = getBlobName(username + "_" + image.name);
+    const containerClient = blobServiceClient.getContainerClient("chat-app");
+    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+    await blockBlobClient.uploadFile(image.path, image, {});
+    const imageUrl = process.env.AZURE_STORED_IMAGE_URL + blobName;
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    const user = new User({
+      name,
+      username,
+      email,
+      phone_no,
+      salt,
+      password: hashedPassword,
+      profile_img: imageUrl,
+    });
+    await user.save();
+    return res.status(200).json({ token: generateAuthToken(user) });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ msg: "Something went wrong !!" });
+  }
+};
 
 const loginUser = async (req, res, next) => {
   const { username, password } = req.body;
@@ -12,28 +58,6 @@ const loginUser = async (req, res, next) => {
     return res.status(401).json({ msg: "Password is not correct !!" });
   return res.status(200).json({ token: generateAuthToken(user) });
 };
-
-const createUser = async (req, res, next) => {
-  const { name, password, phone_no, email, username } = req.body;
-  try {
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-    const user = new User({
-      name,
-      username,
-      email,
-      phone_no,
-      salt,
-      password: hashedPassword,
-    });
-    await user.save();
-    return res.status(200).json({ token: generateAuthToken(user) });
-  } catch (e) {
-    console.log(e);
-    return res.status(500).json({ msg: "Something went wrong !!" });
-  }
-};
-
 const validateUserLoginData = (req, res, next) => {
   const { username, password } = req.body;
   if (!username)
@@ -44,7 +68,7 @@ const validateUserLoginData = (req, res, next) => {
 };
 
 const validateUserSignUpData = (req, res, next) => {
-  const { name, password, phone_no, email, username } = req.body;
+  const { name, password, phone_no, email, username } = req.fields;
   if (!name) return res.status(400).json({ msg: "Name is not present !!" });
   if (!password)
     return res.status(400).json({ msg: "Password is not present !!" });
