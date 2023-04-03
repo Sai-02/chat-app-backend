@@ -1,3 +1,4 @@
+const formidable = require("express-formidable");
 const {
   validateCreateChatData,
   createChat,
@@ -10,7 +11,12 @@ const { ROUTE_PATHS } = require("../utils/constants");
 
 const router = require("express").Router();
 
-router.post(ROUTE_PATHS.CREATE, validateCreateChatData, createChat);
+router.post(
+  ROUTE_PATHS.CREATE,
+  formidable(),
+  validateCreateChatData,
+  createChat
+);
 
 router.get(ROUTE_PATHS.LIST, getChatList);
 

@@ -31,6 +31,10 @@ const chatSchema = new mongoose.Schema({
     type: Date,
     default: Date.now(),
   },
+  group_profile_pic: {
+    type: String,
+    default: "",
+  },
 });
 
 const Chat = mongoose.model("Chat", chatSchema);

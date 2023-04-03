@@ -1,12 +1,13 @@
 const Chat = require("../models/chat");
 const MessageStore = require("../models/messageStore");
 const User = require("../models/user");
+const { uploadImageAndGetURL } = require("../utils/helper");
 
 const validateCreateChatData = async (req, res, next) => {
   const headers = req.headers;
   if (!headers.authorization)
     return res.status(401).json({ msg: "Unauthorized" });
-  const { isGroup, name, admins, members } = req.body;
+  const { isGroup, name, admins, members } = req.fields;
   if (isGroup === undefined)
     return res.status(400).json({ msg: `Missing parameter isGroup` });
   if (!name) return res.status(400).json({ msg: `Missing parameter name` });
@@ -18,21 +19,29 @@ const validateCreateChatData = async (req, res, next) => {
 };
 
 const createChat = async (req, res, next) => {
-  const { isGroup, name, admins, members } = req.body;
+  const { isGroup, name, admins, members } = req.fields;
+  const { image } = req.files;
   try {
+    let imageUrl = "";
     const messageStore = new MessageStore();
     await messageStore.save();
+    const parsedMembers = JSON.parse(members);
+    const parsedIsGroup = JSON.parse(isGroup);
+    if (parsedIsGroup)
+      imageUrl = await uploadImageAndGetURL(name.replace("+", "_"), image);
+
     const chat = new Chat({
-      isGroup,
+      isGroup: parsedIsGroup,
       name,
-      admins,
-      members,
+      admins: JSON.parse(admins),
+      members: parsedMembers,
       messageStoreID: messageStore._id,
+      group_profile_pic: imageUrl,
     });
     await chat.save();
-    await updateChatListOfMembers(members, chat._id);
+    await updateChatListOfMembers(parsedMembers, chat._id);
     if (!isGroup) {
-      await updatePersonalChatMap(members, chat._id.toString());
+      await updatePersonalChatMap(parsedMembers, chat._id.toString());
     }
     return res.status(200).json({ chat });
   } catch (e) {
