@@ -106,8 +106,20 @@ const getChatList = async (req, res, next) => {
       const { unreadMessageCount } = user.chatList.find(
         (val) => val.id.toString() === response.chatList[i]._id.toString()
       );
+      let imageUrl = response.chatList[i].group_profile_pic;
+      if (!response.chatList[i].isGroup) {
+        const members = response.chatList[i].members;
+        if (members[0] === req.body.user.username) {
+          const member = await User.findOne({ username: members[1] });
+          imageUrl = member.profile_img;
+        } else {
+          const member = await User.findOne({ username: members[0] });
+          imageUrl = member.profile_img;
+        }
+      }
       response.chatList[i] = {
         ...response.chatList[i].toObject(),
+        group_profile_pic: imageUrl,
         unreadMessageCount,
       };
     }
