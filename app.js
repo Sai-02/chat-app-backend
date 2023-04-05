@@ -127,25 +127,38 @@ const start = async () => {
             }
           }
           const response = {
-            size: 0,
-            chats: [],
+            personalChatMap: [],
+            chatList: [],
           };
           const chatListIDs = user.chatList.map((chat) => chat.id.toString());
-          response.chats = await Chat.find({ _id: { $in: [...chatListIDs] } });
-          for (let i = 0; i < response.chats.length; i++) {
+          response.chatList = await Chat.find({
+            _id: { $in: [...chatListIDs] },
+          });
+          for (let i = 0; i < response.chatList.length; i++) {
             const { unreadMessageCount } = user.chatList.find(
-              (val) => val.id.toString() === response.chats[i]._id.toString()
+              (val) => val.id.toString() === response.chatList[i]._id.toString()
             );
-            response.chats[i] = {
-              ...response.chats[i].toObject(),
+            let imageUrl = response.chatList[i].group_profile_pic;
+            if (!response.chatList[i].isGroup) {
+              const members = response.chatList[i].members;
+              if (members[0] === user.username) {
+                const member = await User.findOne({ username: members[1] });
+                imageUrl = member.profile_img;
+              } else {
+                const member = await User.findOne({ username: members[0] });
+                imageUrl = member.profile_img;
+              }
+            }
+            response.chatList[i] = {
+              ...response.chatList[i].toObject(),
+              group_profile_pic: imageUrl,
               unreadMessageCount,
             };
-            response.size++;
           }
-          response.chats.sort(
+          response.chatList.sort(
             (a, b) => new Date(b.lastUpdatedTime) - new Date(a.lastUpdatedTime)
           );
-
+          response.personalChatMap = [...user.personalChatMap];
           socket.emit(SOCKET_EVENTS.GET_CHAT_LIST, {
             ...response,
           });
