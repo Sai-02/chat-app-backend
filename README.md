@@ -2,7 +2,7 @@
 
 This project is a simple chat app that provides functionality of personal and group chats. It sends and recieves messages in real time using sockets.
 
-## Frontend
+## Backend
 
 This repo contains the backend of chat-app.<br>
 Link to frontend repo : [https://github.com/Sai-02/chat-app-frontend](https://github.com/Sai-02/chat-app-frontend)
