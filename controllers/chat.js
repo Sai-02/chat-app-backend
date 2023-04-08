@@ -40,7 +40,7 @@ const createChat = async (req, res, next) => {
     });
     await chat.save();
     await updateChatListOfMembers(parsedMembers, chat._id);
-    if (!isGroup) {
+    if (!parsedIsGroup) {
       await updatePersonalChatMap(parsedMembers, chat._id.toString());
     }
     return res.status(200).json({ chat });
