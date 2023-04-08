@@ -15,6 +15,7 @@ const getUsersList = async (req, res) => {
         name: user.name,
         username: user.username,
         email: user.email,
+        profile_img: user.profile_img,
       };
     }
     return res.status(200).json({
