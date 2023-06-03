@@ -36,4 +36,10 @@ Tech stack used for frontend is :
 <img src="https://user-images.githubusercontent.com/56087847/230717894-0acb628a-9225-4519-b07c-5502661c0bcf.jpg" width="300" >
 
 
+## Demo Video
+
+
+
+
+https://user-images.githubusercontent.com/56087847/230738134-82bfc8b1-ba0d-4c4a-a41d-44fbf87d2317.mp4
 
