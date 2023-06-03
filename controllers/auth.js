@@ -81,7 +81,7 @@ const validateUserSignUpData = (req, res, next) => {
 };
 
 const checkUserExists = async (req, res, next) => {
-  const { name, password, phone_no, email, username } = req.body;
+  const { name, password, phone_no, email, username } = req.fields;
   try {
     let user = await User.findOne({ email });
     if (user) return res.status(403).json({ msg: "Email already exists !!" });
